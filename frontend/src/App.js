@@ -19,7 +19,7 @@ function Cars() {
   }
   const [carFormData, setCarFormData] = useState(carFormInitialData);
   const [carData, setCarData] = useState([]);
-  const [showForm, setShowForm] =  useState(false);
+  const [submit, setSubmit] =  useState(true);
 
 
   const handleInputChange = (e) => {
@@ -74,29 +74,45 @@ function Cars() {
      }).then(res=> res.json())
      .then(carInfo => setCarData(carInfo));
 
+     console.log(carFormData)
+
   }
 
+
 /** 🥳🥳🥳🥳🥳🥳 DOUBLE BONUS POINTS 🥳🥳🥳🥳🥳🥳 */
-  const handleEdit = (carInfo) => {
+
+  const getCar = (carID) => {
+    carData.some(car => {
+      if (parseInt(car.id) === parseInt(carID)) {
+        setCarFormData(car);
+      }
+    });
+    setSubmit(false)
+  }
+  const handleEdit = (event) => {
     /**
      * When clicked on a edit button figure out a way to edit the car data.
      * Once edited send the updated data to NodeJS.
      * Then use javascript fetch to send DELETE request to NodeJS
      * https://openjavascript.info/2022/01/03/using-fetch-to-make-get-post-put-and-delete-requests/
      */
-
+    event.preventDefault();
     fetch("http://localhost:3003/cars", 
-     {
-       method: 'PUT',
-       headers: {
-         'Accept': 'application/json',
-         'Content-Type': 'application/json'
-       },
-       body: JSON.stringify(carInfo)
-       
-     }).then(res=> res.json())
-     .then(carInfo => setCarData(carInfo));
+    {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(carFormData)
 
+      
+    }).then(res=> res.json())
+    .then(carInfo => setCarData(carInfo));
+
+    
+    setCarFormData(carFormInitialData);
+    setSubmit(true) 
   }
 
   useEffect(() => {
@@ -133,7 +149,7 @@ function Cars() {
           color:
           <input name='color' type="text" value={carFormData.color} onChange={handleInputChange} />
         </label>
-        <input type="submit" value="Submit"/>
+        {submit ? <input type="submit" value="Submit"/>: <button onClick= {handleEdit}> Done </button>}
       </form>
        {/** 
            * TODO: Update the code below to see any new proprties added to carFormData
@@ -164,7 +180,7 @@ function Cars() {
               <td>{item.brand}</td>
               <td>{item.name}</td>
               <td>{item.releaseYear}</td>
-              <td><button onClick={() => handleEdit(item)}> ✎ </button></td>
+              <td><button onClick={() => getCar(item.id)}> ✎ </button></td>
               <td><button onClick={() => handleDelete(item.id)}>🗑 </button></td>        
             </tr>
            ))}
